@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.mario8a.todoappstarter.data.FakeTaskLocalDataSource
 import com.mario8a.todoappstarter.domain.Task
+import com.mario8a.todoappstarter.presentation.home.HomeScreenRoot
 import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
 import java.util.UUID
 
@@ -25,29 +26,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TodoappstarterTheme {
-                var text by remember {
-                    mutableStateOf("")
-                }
-                val fakeLocalDataSource = FakeTaskLocalDataSource
-                LaunchedEffect(true) {
-                    fakeLocalDataSource.taskFlow.collect {
-                        text = it.toString()
-                    }
-                }
-
-                LaunchedEffect(true) {
-                    fakeLocalDataSource.addTask(
-                        Task(
-                            id = UUID.randomUUID().toString(),
-                            title = "Task 1",
-                            description = "desc 1"
-                        )
-                    )
-                }
-
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Text(text = text, modifier = Modifier.padding(top = innerPadding.calculateTopPadding()).fillMaxSize())
-                }
+                HomeScreenRoot()
             }
         }
     }

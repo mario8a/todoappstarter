@@ -29,8 +29,8 @@ fun SummaryInfo(
     modifier: Modifier = Modifier,
     date: String = "March 9 , 2024",
     taskSummary: String = "5, incomplete, 5 complered",
-    completedTask: Int,
-    totalTask: Int
+    completedTask: Int = 0,
+    totalTask: Int = 0
 ) {
 
     val angleRatio = remember {

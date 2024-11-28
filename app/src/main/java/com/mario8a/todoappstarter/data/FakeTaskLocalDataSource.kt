@@ -2,6 +2,8 @@ package com.mario8a.todoappstarter.data
 
 import com.mario8a.todoappstarter.domain.Task
 import com.mario8a.todoappstarter.domain.TaskLocalDataSource
+import com.mario8a.todoappstarter.presentation.home.providers.completedTask
+import com.mario8a.todoappstarter.presentation.home.providers.pendingTask
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +12,11 @@ object FakeTaskLocalDataSource: TaskLocalDataSource {
     // Un flow es la forma en que observo cambios dentro de esa lista como ej: un borrado, añadir
     // La vista es notificada
     private val _taskFlow = MutableStateFlow<List<Task>>(emptyList())
+
+    init {
+        _taskFlow.value = completedTask + pendingTask
+    }
+
     override val taskFlow: Flow<List<Task>>
         get() = _taskFlow
 
