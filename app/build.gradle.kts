@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 //    alias(libs.plugins.dagger.hilt)
 //    alias(libs.plugins.room)
-//    alias(libs.plugins.ksp)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -76,7 +76,11 @@ dependencies {
 //    androidTestImplementation(libs.androidx.ui.test.junit4)
 
     //Libreria Serializacion
-
     implementation(libs.kotlinx.serialization.json)
+
+    //Librerias Room
+    implementation(libs.room.ktx)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
 
 }
