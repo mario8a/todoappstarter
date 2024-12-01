@@ -46,7 +46,7 @@ import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
 
 @Composable
 fun HomeScreenRoot(
-    navigateToTaskScreen: () -> Unit
+    navigateToTaskScreen: (String?) -> Unit
 ) {
     val viewModel = viewModel<HomeScreenViewModel>()
     val state = viewModel.state
@@ -88,8 +88,11 @@ fun HomeScreenRoot(
         state = state,
         onAction = { action ->
             when (action) {
+                is HomeScreenAction.onClickTask -> {
+                    navigateToTaskScreen(action.taskId)
+                }
                 HomeScreenAction.onAddTask -> {
-                    navigateToTaskScreen()
+                    navigateToTaskScreen(null)
                 }
 
                 else -> viewModel.onAction(action)
@@ -197,7 +200,9 @@ fun HomeScreen(
                         RoundedCornerShape(8.dp)
                     ),
                     task = task,
-                    onClickItem = {},
+                    onClickItem = {
+                        onAction(HomeScreenAction.onClickTask(task.id))
+                    },
                     onDeleteItem = {
                         onAction(HomeScreenAction.onDeleteTask(task))
                     },
@@ -229,7 +234,9 @@ fun HomeScreen(
                         RoundedCornerShape(8.dp)
                     ),
                     task = task,
-                    onClickItem = {},
+                    onClickItem = {
+                        onAction(HomeScreenAction.onClickTask(task.id))
+                    },
                     onDeleteItem = {
                         onAction(HomeScreenAction.onDeleteTask(task))
                     },

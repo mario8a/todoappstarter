@@ -27,11 +27,11 @@ object FakeTaskLocalDataSource: TaskLocalDataSource {
         _taskFlow.value = tasks
     }
 
-    override suspend fun updateTask(task: Task) {
+    override suspend fun updateTask(updatedTask: Task) {
         val tasks = _taskFlow.value.toMutableList()
-        val taskIndex = tasks.indexOfFirst { it.id == task.id }
+        val taskIndex = tasks.indexOfFirst { it.id == updatedTask.id }
         if (taskIndex != -1) {
-            tasks[taskIndex] = task
+            tasks[taskIndex] = updatedTask
             delay(100)
             _taskFlow.value = tasks
         }
