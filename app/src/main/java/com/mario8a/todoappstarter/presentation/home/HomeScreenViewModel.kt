@@ -33,8 +33,13 @@ class HomeScreenViewModel : ViewModel() {
         )
         taskLocalDataSource.taskFlow
             .onEach {
-                val completedTask = it.filter { task -> task.isCompleted }
-                val pendingTask = it.filter { task -> !task.isCompleted }
+                val completedTask =
+                    it.filter { task -> task.isCompleted }.sortedByDescending { task -> task.date }
+                val pendingTask =
+                    it.filter { task -> !task.isCompleted }
+                        .sortedByDescending { task ->
+                            task.date
+                        }
 
                 state = state.copy(
                     summary = pendingTask.size.toString(),
@@ -47,19 +52,22 @@ class HomeScreenViewModel : ViewModel() {
 
     fun onAction(action: HomeScreenAction) {
         viewModelScope.launch {
-            when(action){
+            when (action) {
                 HomeScreenAction.onDeleteAllTask -> {
                     taskLocalDataSource.deleteAllTask()
                     eventChannel.send(HomeScreenEvent.DeletedAllTasks)
                 }
+
                 is HomeScreenAction.onDeleteTask -> {
                     taskLocalDataSource.removeTask(action.task)
                     eventChannel.send(HomeScreenEvent.DeletedTask)
                 }
+
                 is HomeScreenAction.onToggleTask -> {
                     val updatedTask = action.task.copy(isCompleted = !action.task.isCompleted)
                     taskLocalDataSource.updateTask(updatedTask)
                 }
+
                 else -> Unit
             }
         }

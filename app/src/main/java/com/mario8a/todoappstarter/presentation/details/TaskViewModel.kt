@@ -24,7 +24,7 @@ class TaskViewModel : ViewModel() {
 
     private val eventsChannel = Channel<TaskEvent>()
     val events = eventsChannel.receiveAsFlow()
-    private val canSaveTask = snapshotFlow { state.taskName }
+    private val canSaveTask = snapshotFlow { state.taskName.text.toString() }
 
     init {
         canSaveTask.onEach {
@@ -49,8 +49,8 @@ class TaskViewModel : ViewModel() {
                 ActionTask.SaveTask -> {
                     val task = Task(
                         id = UUID.randomUUID().toString(),
-                        title = state.taskName,
-                        description = state.taskDescription,
+                        title = state.taskName.text.toString(),
+                        description = state.taskDescription.text.toString(),
                         isCompleted = state.isTaskDone,
                         category = state.category
                     )
