@@ -1,6 +1,8 @@
 package com.mario8a.todoappstarter.presentation.details
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,7 +18,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -28,6 +30,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,20 +38,45 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mario8a.todoappstarter.R
 import com.mario8a.todoappstarter.domain.Category
 import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TaskScreenRoot() {
+    val viewModel = viewModel<TaskViewModel>()
+    val state = viewModel.state
+    val event = viewModel.events
+
+    val context = LocalContext.current
+
+    LaunchedEffect(true) {
+        event.collect { event ->
+            when (event) {
+                TaskEvent.TaskCreated -> {
+                    Toast.makeText(
+                        context, context.getString(R.string.task_saved), Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
+    }
+    TaskScreen(
+        state = state, onAction = viewModel::onAction
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun TaskScreen(
-    modifier: Modifier = Modifier,
-    state: TaskScreenState
+    modifier: Modifier = Modifier, state: TaskScreenState, onAction: (ActionTask) -> Unit
 ) {
 
     var isDescriptionFocus by remember {
@@ -58,30 +86,37 @@ fun TaskScreen(
         mutableStateOf(false)
     }
 
-    Scaffold (
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        style = MaterialTheme.typography.headlineSmall,
-                        text = stringResource(R.string.task)
-                    )
-                }
-            )
-        }
-    ){ padding->
-        Column (
+    Scaffold(topBar = {
+        TopAppBar(
+            title = {
+                Text(
+                    style = MaterialTheme.typography.headlineSmall,
+                    text = stringResource(R.string.task)
+                )
+            },
+            navigationIcon = {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.clickable {
+                        onAction(
+                            ActionTask.Back
+                        )
+                    })
+            },
+        )
+    }) { padding ->
+        Column(
             verticalArrangement = Arrangement.spacedBy(
                 8.dp
-            ),
-            modifier = Modifier
+            ), modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 16.dp)
-        ){
-            Row (
+        ) {
+            Row(
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 Text(
                     text = stringResource(R.string.done),
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -92,61 +127,63 @@ fun TaskScreen(
                 Checkbox(
                     checked = state.isTaskDone,
                     onCheckedChange = {
-
+                        onAction(
+                            ActionTask.ChangeTaskDone(
+                                isTaskDone = it
+                            )
+                        )
                     },
                 )
                 Spacer(
                     modifier = Modifier.weight(1f)
                 )
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable {
-                        isExpanded = true
-                    }
-                ){
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable {
+                    isExpanded = true
+                }) {
 
                     Text(
                         text = state.category?.toString() ?: stringResource(R.string.category),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = MaterialTheme.colorScheme.onSurface
                         ),
-                        modifier = Modifier.border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.outline,
-                            shape = RoundedCornerShape(8.dp)
-                        )
+                        modifier = Modifier
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(8.dp)
+                            )
                             .padding(8.dp)
                     )
-                    Box (
-                        modifier = Modifier.padding(8.dp),
-                        contentAlignment = Alignment.Center
-                    ){
+                    Box(
+                        modifier = Modifier.padding(8.dp), contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowDown,
                             contentDescription = "Add Task",
                             tint = MaterialTheme.colorScheme.onSurface,
                         )
-                        DropdownMenu(
-                            modifier = Modifier.background(
-                                color = MaterialTheme.colorScheme.surfaceContainerHighest
-                            ),
-                            expanded = isExpanded,
-                            onDismissRequest = { isExpanded = false }
-                        ) {
+                        DropdownMenu(modifier = Modifier.background(
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest
+                        ), expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
                             Column {
                                 Category.entries.forEach { category ->
-                                    Text(
-                                        text = category.name,
+                                    Text(text = category.name,
                                         style = MaterialTheme.typography.bodyMedium.copy(
                                             color = MaterialTheme.colorScheme.onSurface
                                         ),
-                                        modifier = Modifier.padding(8.dp).padding(
-                                            8.dp
-                                        ).clickable {
-
-                                        }
-                                    )
+                                        modifier = Modifier
+                                            .padding(8.dp)
+                                            .padding(
+                                                8.dp
+                                            )
+                                            .clickable {
+                                                onAction(
+                                                    ActionTask.ChangeTaskCategory(
+                                                        category = category
+                                                    )
+                                                )
+                                            })
                                 }
                             }
                         }
@@ -159,8 +196,7 @@ fun TaskScreen(
             BasicTextField(
                 value = state.taskName,
                 textStyle = MaterialTheme.typography.headlineLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
+                    color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold
                 ),
                 maxLines = 1,
                 onValueChange = {
@@ -168,29 +204,19 @@ fun TaskScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight()
-                ,
+                    .wrapContentHeight(),
                 decorationBox = { innerBox ->
-                    Column (
-                        modifier = Modifier.fillMaxWidth(),
-                    ){
-                        if(state.taskName.isEmpty()){
+                    Column {
+                        if (state.taskName.isEmpty()) {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = stringResource(R.string.task_name),
-                                color = MaterialTheme.colorScheme.onSurface.copy(
-                                    alpha = 0.5f
-                                ),
-                                style = MaterialTheme.typography.headlineLarge.copy(
-                                    fontWeight = FontWeight.Bold
-                                )
                             )
-                        }
-                        else{
+                        } else {
                             innerBox()
                         }
                     }
-                }
+                },
             )
             BasicTextField(
                 value = state.taskDescription ?: "",
@@ -203,33 +229,37 @@ fun TaskScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .wrapContentHeight()
                     .onFocusChanged {
                         isDescriptionFocus = it.isFocused
-                    }
-                ,
+                    },
                 decorationBox = { innerBox ->
                     Column {
-                        if(state.taskDescription.isNullOrEmpty() && !isDescriptionFocus){
+                        if (state.taskDescription.isNullOrEmpty() && !isDescriptionFocus) {
                             Text(
                                 text = stringResource(R.string.task_description),
                                 color = MaterialTheme.colorScheme.onSurface.copy(
                                     alpha = 0.5f
                                 )
                             )
-                        }else{
+                        } else {
                             innerBox()
                         }
                     }
-                }
+                },
             )
             Spacer(
                 modifier = Modifier.weight(1f)
             )
             Button(
-                onClick = {  },
-                modifier = Modifier.fillMaxWidth()
+                enabled = state.canSaveTask, onClick = {
+                    onAction(
+                        ActionTask.SaveTask
+                    )
+                }, modifier = Modifier
+                    .fillMaxWidth()
                     .padding(46.dp)
-            ){
+            ) {
                 Text(
                     text = stringResource(R.string.save),
                     style = MaterialTheme.typography.titleMedium.copy(
@@ -245,11 +275,9 @@ fun TaskScreen(
 @Preview()
 fun TaskScreenLightPreview(
     @PreviewParameter(TaskScreenStatePreviewProvider::class) state: TaskScreenState
-){
+) {
     TodoappstarterTheme {
-        TaskScreen(
-            state = state
-        )
+        TaskScreen(state = state, onAction = {})
     }
 }
 
@@ -259,17 +287,9 @@ fun TaskScreenLightPreview(
 )
 fun TaskScreenDarkPreview(
     @PreviewParameter(TaskScreenStatePreviewProvider::class) state: TaskScreenState
-){
+) {
     TodoappstarterTheme {
-        TaskScreen(
-            state = state
-        )
+        TaskScreen(state = state, onAction = {})
     }
 }
 
-data class TaskScreenState(
-    val taskName: String = "",
-    val taskDescription: String? = null,
-    val category: Category? = null,
-    val isTaskDone: Boolean = false
-)
