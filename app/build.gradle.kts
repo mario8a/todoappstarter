@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
 //    alias(libs.plugins.dagger.hilt)
 //    alias(libs.plugins.room)
 //    alias(libs.plugins.ksp)
@@ -65,6 +66,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
 
     // TESTING
 //    testImplementation(libs.junit)
@@ -72,5 +74,9 @@ dependencies {
 //    androidTestImplementation(libs.androidx.espresso.core)
 //    androidTestImplementation(platform(libs.androidx.compose.bom))
 //    androidTestImplementation(libs.androidx.ui.test.junit4)
+
+    //Libreria Serializacion
+
+    implementation(libs.kotlinx.serialization.json)
 
 }

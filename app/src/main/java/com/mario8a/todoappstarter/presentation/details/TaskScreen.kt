@@ -50,7 +50,7 @@ import com.mario8a.todoappstarter.domain.Category
 import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
 
 @Composable
-fun TaskScreenRoot() {
+fun TaskScreenRoot(navigateBack: () -> Boolean) {
     val viewModel = viewModel<TaskViewModel>()
     val state = viewModel.state
     val event = viewModel.events
@@ -64,12 +64,22 @@ fun TaskScreenRoot() {
                     Toast.makeText(
                         context, context.getString(R.string.task_saved), Toast.LENGTH_SHORT
                     ).show()
+                    navigateBack()
                 }
             }
         }
     }
     TaskScreen(
-        state = state, onAction = viewModel::onAction
+        state = state,
+        onAction = { action ->
+            when (action) {
+                ActionTask.Back -> {
+                    navigateBack()
+                }
+
+                else -> viewModel.onAction(action)
+            }
+        }
     )
 }
 
@@ -200,7 +210,7 @@ fun TaskScreen(
                 ),
                 maxLines = 1,
                 onValueChange = {
-
+                    state.taskName = it
                 },
                 modifier = Modifier
                     .fillMaxWidth()

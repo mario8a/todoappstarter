@@ -45,7 +45,9 @@ import com.mario8a.todoappstarter.presentation.home.providers.HomeScreenPreviewP
 import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
 
 @Composable
-fun HomeScreenRoot() {
+fun HomeScreenRoot(
+    navigateToTaskScreen: () -> Unit
+) {
     val viewModel = viewModel<HomeScreenViewModel>()
     val state = viewModel.state
     val event = viewModel.events
@@ -54,14 +56,15 @@ fun HomeScreenRoot() {
 
     LaunchedEffect(true) {
         event.collect { event ->
-            when(event) {
+            when (event) {
                 HomeScreenEvent.DeletedAllTasks -> {
                     Toast.makeText(
-                            context,
-                            context.getString(R.string.all_tasks_deleted),
-                            Toast.LENGTH_SHORT
+                        context,
+                        context.getString(R.string.all_tasks_deleted),
+                        Toast.LENGTH_SHORT
                     )
                 }
+
                 HomeScreenEvent.DeletedTask -> {
                     Toast.makeText(
                         context,
@@ -69,6 +72,7 @@ fun HomeScreenRoot() {
                         Toast.LENGTH_SHORT
                     )
                 }
+
                 HomeScreenEvent.UpdatedTasks -> {
                     Toast.makeText(
                         context,
@@ -82,7 +86,16 @@ fun HomeScreenRoot() {
 
     HomeScreen(
         state = state,
-        onAction = viewModel::onAction
+        onAction = { action ->
+            when (action) {
+                HomeScreenAction.onAddTask -> {
+                    navigateToTaskScreen()
+                }
+
+                else -> viewModel.onAction(action)
+            }
+
+        }
     )
 }
 
@@ -91,7 +104,7 @@ fun HomeScreenRoot() {
 fun HomeScreen(
     modifier: Modifier = Modifier,
     state: HomeDataState,
-    onAction:(HomeScreenAction) -> Unit
+    onAction: (HomeScreenAction) -> Unit
 ) {
     var isMenuExpanded by remember {
         mutableStateOf(false)
@@ -137,7 +150,9 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    onAction(HomeScreenAction.onAddTask)
+                },
                 content = {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -239,7 +254,7 @@ fun HomeScreenPreviewLight(
                 date = state.date,
                 summary = state.summary,
                 completedTask = state.completedTask,
-                pendingTask =  state.pendingTask
+                pendingTask = state.pendingTask
             ),
             onAction = {}
         )
@@ -259,8 +274,8 @@ fun HomeScreenPreviewDark(
             date = state.date,
             summary = state.summary,
             completedTask = state.completedTask,
-            pendingTask =  state.pendingTask
-            ),
+            pendingTask = state.pendingTask
+        ),
             onAction = {}
         )
     }

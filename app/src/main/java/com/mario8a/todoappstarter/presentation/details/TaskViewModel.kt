@@ -1,6 +1,5 @@
 package com.mario8a.todoappstarter.presentation.details
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -16,8 +15,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-@OptIn(ExperimentalFoundationApi::class)
-class TaskViewModel:ViewModel() {
+
+class TaskViewModel : ViewModel() {
     private val fakeTaskLocalDataSource = FakeTaskLocalDataSource
 
     var state by mutableStateOf(TaskScreenState())
@@ -33,10 +32,9 @@ class TaskViewModel:ViewModel() {
         }.launchIn(viewModelScope)
     }
 
-    @OptIn(ExperimentalFoundationApi::class)
-    fun onAction(actionTask: ActionTask){
+    fun onAction(actionTask: ActionTask) {
         viewModelScope.launch {
-            when(actionTask){
+            when (actionTask) {
                 is ActionTask.ChangeTaskCategory -> {
                     state = state.copy(
                         category = actionTask.category
@@ -47,6 +45,7 @@ class TaskViewModel:ViewModel() {
                         isTaskDone = actionTask.isTaskDone
                     )
                 }
+
                 ActionTask.SaveTask -> {
                     val task = Task(
                         id = UUID.randomUUID().toString(),
@@ -61,6 +60,7 @@ class TaskViewModel:ViewModel() {
                     )
                     eventsChannel.send(TaskEvent.TaskCreated)
                 }
+
                 else -> Unit
             }
         }

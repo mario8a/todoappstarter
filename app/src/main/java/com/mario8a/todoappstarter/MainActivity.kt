@@ -4,21 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import com.mario8a.todoappstarter.data.FakeTaskLocalDataSource
-import com.mario8a.todoappstarter.domain.Task
+import androidx.navigation.compose.rememberNavController
 import com.mario8a.todoappstarter.presentation.home.HomeScreenRoot
+import com.mario8a.todoappstarter.presentation.navigation.NavigationRoot
+import com.mario8a.todoappstarter.presentation.navigation.TaskScreenDes
 import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
-import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +16,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TodoappstarterTheme {
-                HomeScreenRoot()
+                val navController = rememberNavController()
+                NavigationRoot(navController = navController)
             }
         }
     }
