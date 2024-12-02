@@ -45,14 +45,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mario8a.todoappstarter.R
 import com.mario8a.todoappstarter.domain.Category
 import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
 
 @Composable
-fun TaskScreenRoot(navigateBack: () -> Boolean) {
-    val viewModel = viewModel<TaskViewModel>()
+fun TaskScreenRoot(
+    navigateBack: () -> Boolean,
+    viewModel: TaskViewModel
+) {
+
     val state = viewModel.state
     val event = viewModel.events
 
@@ -215,7 +217,7 @@ fun TaskScreen(
                     .wrapContentHeight(),
                 decorator = { innerTextField ->
                     Column {
-                        if(state.taskName.text.toString().isEmpty()){
+                        if (state.taskName.text.toString().isEmpty()) {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = stringResource(R.string.task_name),
@@ -239,7 +241,9 @@ fun TaskScreen(
                     },
                 decorator = { innerTextField ->
                     Column {
-                        if(state.taskDescription.text.toString().isEmpty() && !isDescriptionFocus){
+                        if (state.taskDescription.text.toString()
+                                .isEmpty() && !isDescriptionFocus
+                        ) {
                             Text(
                                 text = stringResource(R.string.task_description),
                                 color = MaterialTheme.colorScheme.onSurface.copy(

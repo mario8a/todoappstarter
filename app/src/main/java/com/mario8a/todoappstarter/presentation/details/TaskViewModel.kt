@@ -7,10 +7,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.toRoute
-import com.mario8a.todoappstarter.data.FakeTaskLocalDataSource
+import com.mario8a.todoappstarter.TodoApplication
 import com.mario8a.todoappstarter.domain.Task
+import com.mario8a.todoappstarter.domain.TaskLocalDataSource
 import com.mario8a.todoappstarter.presentation.navigation.TaskScreenDes
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.launchIn
@@ -21,9 +27,10 @@ import java.util.UUID
 
 
 class TaskViewModel(
+    private val taskLocalDataSource: TaskLocalDataSource,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-    private val fakeTaskLocalDataSource = FakeTaskLocalDataSource
+
 
     val taskData = savedStateHandle.toRoute<TaskScreenDes>()
 
@@ -40,11 +47,11 @@ class TaskViewModel(
 
         taskData.taskId?.let {
             viewModelScope.launch {
-                fakeTaskLocalDataSource.getTaskById(taskData.taskId)?.let { task ->
-                    editedTask= task
+                taskLocalDataSource.getTaskById(taskData.taskId)?.let { task ->
+                    editedTask = task
                     state = state.copy(
                         taskName = TextFieldState(task.title),
-                        taskDescription = TextFieldState(task.description?:""),
+                        taskDescription = TextFieldState(task.description ?: ""),
                         isTaskDone = task.isCompleted,
                         category = task.category
                     )
@@ -65,6 +72,7 @@ class TaskViewModel(
                         category = actionTask.category
                     )
                 }
+
                 is ActionTask.ChangeTaskDone -> {
                     state = state.copy(
                         isTaskDone = actionTask.isTaskDone
@@ -73,7 +81,7 @@ class TaskViewModel(
 
                 ActionTask.SaveTask -> {
                     editedTask?.let {
-                        fakeTaskLocalDataSource.updateTask(
+                        taskLocalDataSource.updateTask(
                             updatedTask = it.copy(
                                 id = it.id,
                                 title = state.taskName.text.toString(),
@@ -82,15 +90,15 @@ class TaskViewModel(
                                 category = state.category
                             )
                         )
-                    }?:run {
-                        val task= Task(
-                            id =UUID.randomUUID().toString(),
+                    } ?: run {
+                        val task = Task(
+                            id = UUID.randomUUID().toString(),
                             title = state.taskName.text.toString(),
                             description = state.taskDescription.text.toString(),
                             isCompleted = state.isTaskDone,
                             category = state.category
                         )
-                        fakeTaskLocalDataSource.addTask(
+                        taskLocalDataSource.addTask(
                             task = task
                         )
                     }
@@ -101,5 +109,18 @@ class TaskViewModel(
             }
         }
 
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val savedStateHandle = createSavedStateHandle()
+                val dataSource = (this[APPLICATION_KEY] as TodoApplication).dataSource
+                TaskViewModel(
+                    taskLocalDataSource = dataSource,
+                    savedStateHandle = savedStateHandle
+                )
+            }
+        }
     }
 }
