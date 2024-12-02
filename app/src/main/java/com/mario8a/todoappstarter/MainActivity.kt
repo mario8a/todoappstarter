@@ -9,7 +9,9 @@ import com.mario8a.todoappstarter.presentation.home.HomeScreenRoot
 import com.mario8a.todoappstarter.presentation.navigation.NavigationRoot
 import com.mario8a.todoappstarter.presentation.navigation.TaskScreenDes
 import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
