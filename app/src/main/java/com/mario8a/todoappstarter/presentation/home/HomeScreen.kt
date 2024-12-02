@@ -39,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.mario8a.todoappstarter.R
 import com.mario8a.todoappstarter.presentation.home.providers.HomeScreenPreviewProvider
 import com.mario8a.todoappstarter.ui.theme.TodoappstarterTheme
@@ -91,6 +90,7 @@ fun HomeScreenRoot(
                 is HomeScreenAction.onClickTask -> {
                     navigateToTaskScreen(action.taskId)
                 }
+
                 HomeScreenAction.onAddTask -> {
                     navigateToTaskScreen(null)
                 }
@@ -139,7 +139,10 @@ fun HomeScreen(
                         onDismissRequest = { isMenuExpanded = false }) {
                         DropdownMenuItem(
                             text = {
-                                Text(text = stringResource(id = R.string.delete_all))
+                                Text(
+                                    text = stringResource(id = R.string.delete_all),
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
                             },
                             onClick = {
                                 onAction(HomeScreenAction.onDeleteAllTask)
@@ -150,6 +153,102 @@ fun HomeScreen(
                 }
             }
             )
+        },
+        content = { paddingValues ->
+            if (state.completedTask.isEmpty() && state.pendingTask.isEmpty()){
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ){
+                    Text(
+                        text = stringResource(R.string.no_tasks),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    item {
+                        SummaryInfo(
+                            date = state.date,
+                            taskSummary = state.summary,
+                            completedTask = state.completedTask.size,
+                            totalTask = state.completedTask.size + state.pendingTask.size
+                        )
+                    }
+                    stickyHeader {
+                        SectionTitle(
+                            modifier = Modifier
+                                .fillParentMaxWidth()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface
+                                ),
+                            title = stringResource(id = R.string.completedTask)
+                        )
+                    }
+
+                    items(
+                        state.completedTask,
+                        key = { task -> task.id }
+                    ) { task ->
+                        TaskItem(
+                            modifier = Modifier.clip(
+                                RoundedCornerShape(8.dp)
+                            ),
+                            task = task,
+                            onClickItem = {
+                                onAction(HomeScreenAction.onClickTask(task.id))
+                            },
+                            onDeleteItem = {
+                                onAction(HomeScreenAction.onDeleteTask(task))
+                            },
+                            onToggleCompletition = {
+                                onAction(HomeScreenAction.onToggleTask(task))
+                            },
+
+                            )
+                    }
+
+                    // No completed task
+                    stickyHeader {
+                        SectionTitle(
+                            modifier = Modifier
+                                .fillParentMaxWidth()
+                                .background(
+                                    color = MaterialTheme.colorScheme.surface
+                                ),
+                            title = stringResource(id = R.string.pending_tasks)
+                        )
+                    }
+
+                    items(
+                        state.pendingTask,
+                        key = { task -> task.id }
+                    ) { task ->
+                        TaskItem(
+                            modifier = Modifier.clip(
+                                RoundedCornerShape(8.dp)
+                            ),
+                            task = task,
+                            onClickItem = {
+                                onAction(HomeScreenAction.onClickTask(task.id))
+                            },
+                            onDeleteItem = {
+                                onAction(HomeScreenAction.onDeleteTask(task))
+                            },
+                            onToggleCompletition = {
+                                onAction(HomeScreenAction.onToggleTask(task))
+                            },
+
+                            )
+                    }
+                }
+            }
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -165,89 +264,7 @@ fun HomeScreen(
                 }
             )
         }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            item {
-                SummaryInfo(
-                    date = state.date,
-                    taskSummary = state.summary,
-                    completedTask = state.completedTask.size,
-                    totalTask = state.completedTask.size + state.pendingTask.size
-                )
-            }
-            stickyHeader {
-                SectionTitle(
-                    modifier = Modifier
-                        .fillParentMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface
-                        ),
-                    title = stringResource(id = R.string.completedTask)
-                )
-            }
-
-            items(
-                state.completedTask,
-                key = { task -> task.id }
-            ) { task ->
-                TaskItem(
-                    modifier = Modifier.clip(
-                        RoundedCornerShape(8.dp)
-                    ),
-                    task = task,
-                    onClickItem = {
-                        onAction(HomeScreenAction.onClickTask(task.id))
-                    },
-                    onDeleteItem = {
-                        onAction(HomeScreenAction.onDeleteTask(task))
-                    },
-                    onToggleCompletition = {
-                        onAction(HomeScreenAction.onToggleTask(task))
-                    },
-
-                    )
-            }
-
-            // No completed task
-            stickyHeader {
-                SectionTitle(
-                    modifier = Modifier
-                        .fillParentMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.surface
-                        ),
-                    title = stringResource(id = R.string.pending_tasks)
-                )
-            }
-
-            items(
-                state.pendingTask,
-                key = { task -> task.id }
-            ) { task ->
-                TaskItem(
-                    modifier = Modifier.clip(
-                        RoundedCornerShape(8.dp)
-                    ),
-                    task = task,
-                    onClickItem = {
-                        onAction(HomeScreenAction.onClickTask(task.id))
-                    },
-                    onDeleteItem = {
-                        onAction(HomeScreenAction.onDeleteTask(task))
-                    },
-                    onToggleCompletition = {
-                        onAction(HomeScreenAction.onToggleTask(task))
-                    },
-
-                    )
-            }
-        }
-    }
+    )
 }
 
 @Preview

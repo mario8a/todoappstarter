@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">todoappstarter</string>
+    <string name="app_name">Todo App</string>
     <string name="delete_all">Delete All</string>
     <string name="completedTask">Completed</string>
     <string name="pending_tasks">Pending</string>
@@ -14,4 +14,5 @@
     <string name="task_description">Task description</string>
     <string name="save">Save</string>
     <string name="task_saved">Task saved</string>
+    <string name="no_tasks">No task has been created.</string>
 </resources>
