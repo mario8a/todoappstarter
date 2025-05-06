@@ -43,6 +43,8 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -101,7 +103,11 @@ fun TaskScreen(
         mutableStateOf(false)
     }
 
-    Scaffold(topBar = {
+    Scaffold(
+        modifier = Modifier.semantics {
+            contentDescription = "Task Screen"
+        },
+        topBar = {
         TopAppBar(
             title = {
                 Text(
@@ -117,7 +123,10 @@ fun TaskScreen(
                         onAction(
                             ActionTask.Back
                         )
-                    })
+                    }.semantics {
+                        contentDescription = "Back Button"
+                    }
+                )
             },
         )
     }) { padding ->
@@ -149,6 +158,9 @@ fun TaskScreen(
                             )
                         )
                     },
+                    modifier = Modifier.semantics {
+                        contentDescription = "Task Completion Checkbox"
+                    }
                 )
                 Spacer(
                     modifier = Modifier.weight(1f)
@@ -217,7 +229,10 @@ fun TaskScreen(
                 lineLimits = TextFieldLineLimits.SingleLine,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .wrapContentHeight(),
+                    .wrapContentHeight()
+                    .semantics {
+                        contentDescription = "Task Title Input"
+                    },
                 decorator = { innerTextField ->
                     Column {
                         if (state.taskName.text.toString().isEmpty()) {
@@ -251,6 +266,9 @@ fun TaskScreen(
                     .wrapContentHeight()
                     .onFocusChanged {
                         isDescriptionFocus = it.isFocused
+                    }
+                    .semantics {
+                        contentDescription = "Task Description Input"
                     },
                 decorator = { innerTextField ->
                     Column {
@@ -280,6 +298,9 @@ fun TaskScreen(
                 }, modifier = Modifier
                     .fillMaxWidth()
                     .padding(46.dp)
+                    .semantics {
+                        contentDescription = "Save Task Button"
+                    }
             ) {
                 Text(
                     text = stringResource(R.string.save),

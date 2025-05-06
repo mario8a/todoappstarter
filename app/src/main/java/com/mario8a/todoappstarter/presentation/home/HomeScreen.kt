@@ -35,6 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -113,7 +115,10 @@ fun HomeScreen(
         mutableStateOf(false)
     }
     Scaffold(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize()
+            .semantics {
+                contentDescription = "Home Screen"
+            },
         topBar = {
             TopAppBar(title = {
                 Text(
@@ -131,7 +136,7 @@ fun HomeScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.MoreVert,
-                        contentDescription = "Add Task",
+                        contentDescription = "More Options",
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                     DropdownMenu(
@@ -155,14 +160,17 @@ fun HomeScreen(
             )
         },
         content = { paddingValues ->
-            if (state.completedTask.isEmpty() && state.pendingTask.isEmpty()){
+            if (state.completedTask.isEmpty() && state.pendingTask.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = androidx.compose.ui.Alignment.Center
-                ){
+                ) {
                     Text(
                         text = stringResource(R.string.no_tasks),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.semantics {
+                            contentDescription = "Empty Task State"
+                        },
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -197,9 +205,13 @@ fun HomeScreen(
                         key = { task -> task.id }
                     ) { task ->
                         TaskItem(
-                            modifier = Modifier.clip(
-                                RoundedCornerShape(8.dp)
-                            ),
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .semantics {
+                                    contentDescription = "Pending Task: ${task.title}"
+                                },
                             task = task,
                             onClickItem = {
                                 onAction(HomeScreenAction.onClickTask(task.id))
@@ -231,9 +243,13 @@ fun HomeScreen(
                         key = { task -> task.id }
                     ) { task ->
                         TaskItem(
-                            modifier = Modifier.clip(
-                                RoundedCornerShape(8.dp)
-                            ),
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .semantics {
+                                    contentDescription = "Pending Task: ${task.title}"
+                                },
                             task = task,
                             onClickItem = {
                                 onAction(HomeScreenAction.onClickTask(task.id))
@@ -252,6 +268,9 @@ fun HomeScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier.semantics {
+                    contentDescription = "Add New Task Button"
+                },
                 onClick = {
                     onAction(HomeScreenAction.onAddTask)
                 },
